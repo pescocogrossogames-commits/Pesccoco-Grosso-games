@@ -1,0 +1,1879 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elemental Dominion</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101316;
+      --panel: #191e24;
+      --panel-2: #222934;
+      --line: #354151;
+      --text: #f6f0df;
+      --muted: #aeb8c6;
+      --gold: #e9b44c;
+      --green: #63be7b;
+      --red: #dc6b5d;
+      --blue: #63a8e8;
+      --violet: #a987d9;
+      --shadow: 0 16px 40px rgba(0, 0, 0, .36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(99, 168, 232, .20), transparent 26%),
+        radial-gradient(circle at 82% 12%, rgba(233, 180, 76, .14), transparent 24%),
+        linear-gradient(135deg, #101316 0%, #171d21 48%, #12121a 100%);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: 0;
+    }
+
+    canvas#field {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .55;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1480px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 18px 0 24px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      min-height: 78px;
+      border-bottom: 1px solid rgba(246, 240, 223, .14);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 3vw, 3rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .turn-badge {
+      justify-self: center;
+      min-width: 240px;
+      padding: 11px 16px;
+      border: 1px solid rgba(233, 180, 76, .45);
+      border-radius: 8px;
+      background: rgba(25, 30, 36, .82);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .turn-badge strong {
+      display: block;
+      color: var(--gold);
+      font-size: 1rem;
+    }
+
+    .turn-timer {
+      display: block;
+      margin: 2px 0 -2px;
+      color: #fff0bd;
+      font-size: clamp(2.2rem, 4vw, 3.8rem);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      text-shadow: 0 0 18px rgba(233, 180, 76, .55);
+    }
+
+    .turn-badge span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    .actions {
+      justify-self: end;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .sound-button,
+    .menu-sound-button {
+      display: grid;
+      width: 42px;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 1px solid rgba(246, 240, 223, .22);
+      border-radius: 50%;
+      background: #252d37;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.15rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .28);
+    }
+
+    .sound-button:hover,
+    .menu-sound-button:hover { border-color: var(--gold); background: #344050; }
+
+    .menu-sound-button { position: fixed; z-index: 7; top: 22px; right: 24px; }
+
+    .menu-credit {
+      position: fixed;
+      z-index: 6;
+      right: 16px;
+      bottom: 10px;
+      display: grid;
+      justify-items: end;
+      width: min(25vw, 290px);
+      pointer-events: none;
+    }
+
+    .menu-credit strong {
+      display: block;
+      margin: 0 4px -4px 0;
+      color: #fff1d2;
+      font-size: clamp(.7rem, 1.25vw, 1rem);
+      line-height: 1.15;
+      letter-spacing: 0;
+      text-align: right;
+      text-shadow: 0 2px 8px #000, 0 0 14px rgba(233, 180, 76, .62);
+      transform-origin: right bottom;
+      animation: creditSway 2.5s ease-in-out infinite alternate;
+    }
+
+    .menu-credit img {
+      display: block;
+      width: 100%;
+      max-height: 39vh;
+      object-fit: contain;
+      object-position: right bottom;
+      filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .48));
+    }
+
+    @keyframes creditSway {
+      from { transform: rotate(-2deg) translateY(0); }
+      to { transform: rotate(2deg) translateY(-5px); }
+    }
+
+    .btn {
+      min-height: 42px;
+      border: 1px solid rgba(246, 240, 223, .16);
+      border-radius: 8px;
+      background: #252d37;
+      color: var(--text);
+      cursor: pointer;
+      padding: 0 13px;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      outline: none;
+      transform: translateY(-1px);
+      border-color: rgba(233, 180, 76, .55);
+      background: #2d3642;
+    }
+
+    .btn.primary {
+      background: #b66f30;
+      border-color: #e9b44c;
+      color: #160f08;
+      font-weight: 800;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: minmax(210px, 260px) minmax(0, 1fr) minmax(260px, 340px);
+      gap: 16px;
+      margin-top: 18px;
+      align-items: stretch;
+    }
+
+    .side,
+    .arena,
+    .log {
+      border: 1px solid rgba(246, 240, 223, .14);
+      border-radius: 8px;
+      background: rgba(25, 30, 36, .82);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .side {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .player-box {
+      border: 1px solid rgba(246, 240, 223, .10);
+      border-radius: 8px;
+      background: rgba(34, 41, 52, .72);
+      padding: 12px;
+    }
+
+    .player-box h2,
+    .log h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .meter-row {
+      display: grid;
+      grid-template-columns: 58px 1fr 46px;
+      gap: 8px;
+      align-items: center;
+      margin: 9px 0;
+      color: var(--muted);
+      font-size: .84rem;
+    }
+
+    .meter {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #111820;
+      border: 1px solid rgba(246, 240, 223, .08);
+    }
+
+    .meter i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 50%;
+      border-radius: inherit;
+      background: var(--blue);
+      transition: width .24s ease;
+    }
+
+    .player-box.enemy .meter i {
+      background: var(--red);
+    }
+
+    .meter.mantra i {
+      background: #a36cf3;
+      box-shadow: 0 0 14px rgba(163, 108, 243, .7);
+    }
+
+    .meter.mantra {
+      height: 32px;
+      border-radius: 999px;
+      border-color: rgba(214, 184, 255, .54);
+      background: linear-gradient(180deg, #0b0b13, #27203c 45%, #11101c);
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, .65), 0 0 16px rgba(163, 108, 243, .24);
+    }
+
+    .meter.mantra i::before,
+    .meter.mantra i::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      width: 8px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(245, 231, 255, .72);
+      box-shadow: 13px -8px 0 -2px rgba(245, 231, 255, .55), 28px 3px 0 -3px rgba(245, 231, 255, .66);
+      animation: mantraBubbles 1.8s linear infinite;
+    }
+
+    .meter.mantra i::after { left: 45%; animation-delay: -.9s; transform: scale(.7); }
+
+    @keyframes mantraBubbles {
+      from { opacity: 0; translate: 0 8px; }
+      20% { opacity: .9; }
+      to { opacity: 0; translate: 5px -27px; }
+    }
+
+    .mantra-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      margin-top: 6px;
+      padding: 0 8px;
+      border: 1px solid rgba(163, 108, 243, .35);
+      border-radius: 999px;
+      color: #d8c5ff;
+      background: rgba(86, 48, 130, .28);
+      font-size: .75rem;
+      font-weight: 800;
+    }
+
+    .tips {
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.45;
+      margin-top: auto;
+    }
+
+    .arena {
+      height: 720px;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: 76px 290px minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .enemy-hand {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      min-height: 74px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .card-back {
+      width: 46px;
+      height: 66px;
+      border: 1px solid rgba(233, 180, 76, .45);
+      border-radius: 7px;
+      background:
+        linear-gradient(135deg, rgba(233, 180, 76, .28), transparent 42%),
+        repeating-linear-gradient(45deg, #202936, #202936 6px, #17202b 6px, #17202b 12px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .26);
+    }
+
+    .battle {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr minmax(90px, 140px) 1fr;
+      gap: 14px;
+      align-items: center;
+      justify-items: center;
+      border: 1px solid rgba(246, 240, 223, .10);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(246, 240, 223, .05), transparent),
+        rgba(16, 19, 22, .55);
+      padding: 18px;
+      height: 290px;
+      overflow: hidden;
+    }
+
+    .effects-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .slot {
+      position: relative;
+      z-index: 3;
+      width: min(220px, 100%);
+      min-height: 238px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed rgba(246, 240, 223, .20);
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px;
+    }
+
+    .versus {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      color: var(--gold);
+      font-weight: 900;
+      font-size: clamp(1.2rem, 3vw, 2.2rem);
+    }
+
+    .result-pill {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(233, 180, 76, .16);
+      border: 1px solid rgba(233, 180, 76, .34);
+      color: var(--text);
+      font-size: .78rem;
+      text-align: center;
+    }
+
+    .hand-wrap {
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .hand-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: .88rem;
+    }
+
+    .hand {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 190px;
+      border: 1px solid rgba(246, 240, 223, .15);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 46%), #26303a;
+      color: var(--text);
+      padding: 11px;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      gap: 7px;
+      cursor: pointer;
+      box-shadow: 0 14px 25px rgba(0, 0, 0, .24);
+      transition: transform .16s ease, border-color .16s ease, filter .16s ease;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--glow, rgba(99, 168, 232, .22));
+      opacity: .52;
+      z-index: -1;
+    }
+
+    .card:not(.disabled):hover,
+    .card:not(.disabled):focus-visible {
+      outline: none;
+      transform: translateY(-4px);
+      border-color: rgba(233, 180, 76, .7);
+      filter: brightness(1.08);
+    }
+
+    .card.disabled {
+      cursor: default;
+      opacity: .68;
+      transform: none;
+    }
+
+    .card.unavailable {
+      opacity: .48;
+      filter: grayscale(.4);
+    }
+
+    .card.selected {
+      border-color: #e9b44c;
+      box-shadow: 0 0 0 2px rgba(233, 180, 76, .34), 0 16px 32px rgba(0, 0, 0, .38);
+      transform: translateY(-5px);
+    }
+
+    .card .rarity {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: .72rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .card .emoji {
+      align-self: center;
+      justify-self: center;
+      font-size: 3rem;
+      filter: drop-shadow(0 8px 8px rgba(0, 0, 0, .3));
+    }
+
+    .card .name {
+      font-size: 1.05rem;
+      font-weight: 900;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .card .stats {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .cost {
+      color: #d8c5ff;
+      font-weight: 900;
+    }
+
+    .fx-dot,
+    .fx-ring,
+    .fx-meteor,
+    .fx-crack {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .fx-dot {
+      width: var(--s);
+      height: var(--s);
+      border-radius: 50%;
+      animation: dustPop 1.6s ease-out forwards;
+    }
+
+    .fx-dot.common {
+      background: rgba(235, 235, 228, .9);
+      box-shadow: 0 0 10px rgba(130, 136, 139, .55);
+    }
+
+    .fx-dot.rare {
+      background: rgba(101, 212, 133, .7);
+      box-shadow: 0 0 18px rgba(101, 212, 133, .55);
+      animation-name: smokeRise;
+      filter: blur(1px);
+    }
+
+    .fx-ring {
+      width: var(--s);
+      height: var(--s);
+      border: 3px solid rgba(181, 113, 255, .7);
+      border-radius: 50%;
+      animation: spiralSpin 2s ease-out forwards;
+      box-shadow: 0 0 22px rgba(181, 113, 255, .48);
+    }
+
+    .fx-meteor {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ffd15a;
+      box-shadow: -48px -90px 48px 12px rgba(255, 90, 34, .86), 0 0 42px 12px rgba(255, 211, 92, .98);
+      animation: meteorFall 1.7s cubic-bezier(.12, .78, .28, 1) forwards;
+    }
+
+    .fx-crack {
+      width: var(--w);
+      height: 2px;
+      background: #ffd15a;
+      transform: translate(-50%, -50%) rotate(var(--r));
+      box-shadow: 0 0 13px rgba(255, 209, 90, .78);
+      animation: crackFade 3s ease-out forwards;
+      transform-origin: center;
+    }
+
+    body.shake .app {
+      animation: screenShake .9s linear;
+    }
+
+    @keyframes dustPop {
+      from { opacity: .95; transform: translate(-50%, -50%) scale(.6); }
+      to { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(2.4); }
+    }
+
+    @keyframes smokeRise {
+      from { opacity: .8; transform: translate(-50%, -50%) scale(.7); }
+      to { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-80% + var(--dy))) scale(4); }
+    }
+
+    @keyframes spiralSpin {
+      from { opacity: .9; transform: translate(-50%, -50%) rotate(0deg) scale(.3); }
+      to { opacity: 0; transform: translate(-50%, -50%) rotate(540deg) scale(2.5); }
+    }
+
+    @keyframes meteorFall {
+      from { opacity: 0; transform: translate(-50%, -1200%) scale(.35); }
+      12% { opacity: 1; }
+      78% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+      to { opacity: 0; transform: translate(-50%, -50%) scale(3.8); }
+    }
+
+    @keyframes crackFade {
+      from { opacity: 0; width: 0; }
+      12% { opacity: 1; width: var(--w); }
+      to { opacity: 0; width: var(--w); }
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-8px, 5px); }
+      40% { transform: translate(7px, -5px); }
+      60% { transform: translate(-5px, -3px); }
+      80% { transform: translate(5px, 3px); }
+    }
+
+    .card.legendary {
+      border-color: rgba(233, 180, 76, .55);
+    }
+
+    .card.epic {
+      border-color: rgba(169, 135, 217, .55);
+    }
+
+    .log {
+      min-height: 650px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .feed {
+      overflow: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .event {
+      border: 1px solid rgba(246, 240, 223, .10);
+      border-radius: 8px;
+      background: rgba(34, 41, 52, .7);
+      padding: 10px;
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.35;
+    }
+
+    .event strong {
+      color: var(--text);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .62);
+    }
+
+    .modal.open {
+      display: grid;
+    }
+
+    .modal-box {
+      width: min(500px, 100%);
+      border: 1px solid rgba(233, 180, 76, .45);
+      border-radius: 8px;
+      background: #1b2128;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      text-align: center;
+    }
+
+    .modal-box h2 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    .modal-box p {
+      color: var(--muted);
+      margin: 0 0 18px;
+    }
+
+    .main-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(260px, .8fr) minmax(360px, 1.2fr);
+      gap: clamp(24px, 6vw, 100px);
+      align-items: center;
+      padding: clamp(24px, 7vw, 100px);
+      background: rgba(10, 14, 18, .78);
+      backdrop-filter: blur(12px);
+    }
+
+    .main-menu[hidden] { display: none; }
+    .menu-copy { position: relative; z-index: 5; }
+    .menu-copy h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 5.4rem); line-height: .88; text-transform: uppercase; }
+    .menu-copy p { margin: 16px 0 30px; color: var(--muted); font-size: 1rem; }
+    .menu-actions { display: grid; width: min(100%, 480px); gap: 14px; }
+
+    .menu-button {
+      position: relative;
+      min-height: 92px;
+      border: 1px solid rgba(246, 240, 223, .18);
+      border-radius: 8px;
+      background: #202832;
+      color: var(--text);
+      cursor: pointer;
+      padding: 0 58px 0 26px;
+      text-align: left;
+      font-size: clamp(1.35rem, 2.6vw, 2.1rem);
+      font-weight: 900;
+      clip-path: polygon(0 9%, 100% 0, 100% 100%, 0 91%);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .menu-button:not(:disabled):hover, .menu-button:not(:disabled):focus-visible {
+      outline: none;
+      transform: translateX(10px) skewX(-2deg);
+      border-color: var(--gold);
+      background: #ad682d;
+      color: #170f08;
+    }
+
+    .menu-button:disabled { cursor: not-allowed; color: #84909d; opacity: .68; }
+    .menu-button.locked::after { content: "\1F512"; position: absolute; right: 24px; font-size: 1.3rem; }
+
+    .menu-button.pvp {
+      border-color: #ff6a47;
+      background: linear-gradient(90deg, #5d1110, #c52e1e 62%, #ff7a27);
+      color: #ffe5c7;
+      box-shadow: 0 0 22px rgba(255, 76, 38, .42), inset 0 0 24px rgba(255, 185, 83, .18);
+      animation: pvpFlame 1.3s ease-in-out infinite alternate;
+    }
+
+    .menu-button.pvp:disabled { color: #ffd9ca; opacity: .82; }
+
+    @keyframes pvpFlame {
+      from { filter: brightness(.94); box-shadow: 0 0 16px rgba(255, 58, 28, .35), inset 0 0 18px rgba(255, 185, 83, .13); }
+      to { filter: brightness(1.25); box-shadow: 0 0 35px rgba(255, 99, 34, .72), inset 0 0 30px rgba(255, 218, 103, .27); }
+    }
+
+    .menu-clash {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      perspective: 950px;
+    }
+
+    .menu-clash::after {
+      content: "";
+      position: absolute;
+      right: 3%; bottom: 10%; left: 3%; height: 18%;
+      border-top: 1px solid rgba(233, 180, 76, .45);
+      background: repeating-linear-gradient(120deg, transparent 0 32px, rgba(233, 180, 76, .09) 33px 35px);
+      transform: perspective(180px) rotateX(58deg);
+    }
+
+    .menu-element {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      display: grid;
+      place-items: center;
+      width: clamp(220px, 38vw, 600px);
+      aspect-ratio: 3 / 4;
+      border: 1px solid rgba(246, 240, 223, .34);
+      border-radius: 8px;
+      color: white;
+      font-size: clamp(7rem, 20vw, 15rem);
+      box-shadow: 0 26px 56px rgba(0, 0, 0, .52);
+      transform-style: preserve-3d;
+    }
+
+    .menu-element.water { left: -8%; background: #176eaa; animation: waterCharge 1.15s cubic-bezier(.12,.8,.2,1) forwards, waterPressure .28s 1.25s ease-in-out infinite alternate; }
+    .menu-element.fire { right: -8%; background: #a83c26; animation: fireCharge 1.15s cubic-bezier(.12,.8,.2,1) forwards, firePressure .28s 1.25s ease-in-out infinite alternate; }
+    .menu-explosion {
+      position: absolute;
+      z-index: 3;
+      top: 50%; left: 50%; width: 24px; aspect-ratio: 1;
+      border-radius: 50%;
+      background: #fff5ca;
+      box-shadow: 0 0 0 0 rgba(233, 180, 76, .8), 0 0 48px 18px rgba(233, 116, 66, .64);
+      transform: translate(-50%, -50%);
+      animation: menuBurst .95s ease-out forwards;
+    }
+
+    .menu-clash-label { position: absolute; z-index: 4; bottom: 10%; left: 50%; color: var(--gold); font-size: clamp(1rem, 2vw, 1.45rem); font-weight: 900; transform: translateX(-50%); }
+    @keyframes waterCharge {
+      0% { transform: translate(-32%, -50%) rotate(-24deg) rotateY(0deg); }
+      72% { transform: translate(78%, -50%) rotate(12deg) rotateY(1080deg); }
+      100% { transform: translate(65%, -50%) rotate(10deg) rotateY(0deg); }
+    }
+    @keyframes fireCharge {
+      0% { transform: translate(32%, -50%) rotate(24deg) rotateY(0deg); }
+      72% { transform: translate(-78%, -50%) rotate(-12deg) rotateY(-1440deg); }
+      100% { transform: translate(-65%, -50%) rotate(-10deg) rotateY(0deg); }
+    }
+    @keyframes waterPressure { from { transform: translate(65%, -50%) rotate(10deg); } to { transform: translate(59%, -50%) rotate(7deg); } }
+    @keyframes firePressure { from { transform: translate(-65%, -50%) rotate(-10deg); } to { transform: translate(-59%, -50%) rotate(-7deg); } }
+    @keyframes menuBurst {
+      0%, 65% { opacity: 0; transform: translate(-50%, -50%) scale(.1); }
+      74% { opacity: 1; transform: translate(-50%, -50%) scale(4.8); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(8); }
+    }
+
+    @media (max-width: 720px) {
+      .main-menu { grid-template-columns: 1fr; padding: 28px 20px; }
+      .menu-copy p { margin-bottom: 20px; }
+      .menu-credit { width: min(40vw, 180px); right: 6px; bottom: 4px; }
+      .menu-credit strong { font-size: .62rem; }
+    }
+
+    @media (max-width: 1080px) {
+      .topbar,
+      .board {
+        grid-template-columns: 1fr;
+      }
+
+      .turn-badge,
+      .actions {
+        justify-self: stretch;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .arena,
+      .log {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app {
+        width: min(100% - 14px, 1480px);
+        padding-top: 10px;
+      }
+
+      .battle {
+        grid-template-columns: 1fr;
+      }
+
+      .versus {
+        order: 2;
+      }
+
+      .slot.enemy-slot {
+        order: 3;
+      }
+
+      .slot {
+        min-height: 210px;
+      }
+
+      .hand {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .card {
+        min-height: 168px;
+        padding: 9px;
+      }
+
+      .card .emoji {
+        font-size: 2.45rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <audio id="menuMusic" src="elemental-dominion-menu.mp3" preload="auto" autoplay loop></audio>
+  <audio id="battleMusic" src="elemental-dominion-versus.mp3" preload="auto" loop></audio>
+  <section class="main-menu" id="mainMenu" aria-label="Menu principal">
+    <button class="menu-sound-button" id="menuSoundBtn" type="button" aria-label="Ativar música do menu" title="Ativar música">🔊</button>
+    <div class="menu-credit" aria-label="Créditos">
+      <strong>criado por IA e direcionamento por PESCOÇO GROSSO GAMES</strong>
+      <img src="pescoco-grosso-games.png" alt="Mascote PESCOÇO GROSSO GAMES">
+    </div>
+    <div class="menu-copy">
+      <h1>Elemental<br>Dominion</h1>
+      <p>Escolha seu domínio e prepare a próxima colisão elemental.</p>
+      <div class="menu-actions">
+        <button class="menu-button" id="startBattleBtn" type="button">Nova BATALHA</button>
+        <button class="menu-button locked" type="button" disabled aria-label="Loja bloqueada">Loja</button>
+        <button class="menu-button locked" type="button" disabled aria-label="Modo história bloqueado">Modo história</button>
+        <button class="menu-button locked pvp" type="button" disabled aria-label="Jogador Vs Jogador bloqueado">Jogador Vs Jogador</button>
+      </div>
+    </div>
+    <div class="menu-clash" aria-hidden="true">
+      <div class="menu-element water" id="menuWater">💧</div>
+      <div class="menu-explosion"></div>
+      <div class="menu-element fire" id="menuFire">🔥</div>
+      <div class="menu-clash-label" id="menuClashLabel">AGUA VS FOGO</div>
+    </div>
+  </section>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Elemental Dominion</h1>
+        <p>Esvazie o deck e a mão da IA usando vantagem lógica, evolução e recursos.</p>
+      </div>
+      <div class="turn-badge" aria-live="polite">
+        <strong id="turnLabel">Turno 1</strong>
+        <b class="turn-timer" id="turnTimer">60</b>
+        <span id="stateLabel">Escolha uma carta para batalhar</span>
+      </div>
+      <div class="actions">
+        <button class="sound-button" id="battleSoundBtn" type="button" aria-label="Ativar música da batalha" title="Ativar música">🔊</button>
+        <button class="btn" id="rulesBtn" type="button">Regras</button>
+        <button class="btn primary" id="restartBtn" type="button">Nova partida</button>
+      </div>
+    </header>
+
+    <section class="board">
+      <aside class="side" aria-label="Estado da partida">
+        <div class="player-box">
+          <h2>Você</h2>
+          <div class="meter-row"><span>Mantra</span><div class="meter mantra"><i id="playerMantraMeter"></i></div><b id="playerMantraCount">10</b></div>
+          <div class="mantra-status" id="playerMantraStatus">Estável</div>
+          <div class="meter-row"><span>Deck</span><div class="meter"><i id="playerDeckMeter"></i></div><b id="playerDeckCount">30</b></div>
+          <div class="meter-row"><span>Mão</span><div class="meter"><i id="playerHandMeter"></i></div><b id="playerHandCount">6</b></div>
+        </div>
+        <div class="player-box enemy">
+          <h2>IA</h2>
+          <div class="meter-row"><span>Mantra</span><div class="meter mantra"><i id="aiMantraMeter"></i></div><b id="aiMantraCount">10</b></div>
+          <div class="mantra-status" id="aiMantraStatus">Estável</div>
+          <div class="meter-row"><span>Deck</span><div class="meter"><i id="aiDeckMeter"></i></div><b id="aiDeckCount">30</b></div>
+          <div class="meter-row"><span>Mão</span><div class="meter"><i id="aiHandMeter"></i></div><b id="aiHandCount">6</b></div>
+        </div>
+        <div class="tips" id="tipBox">
+          Vitória: o adversário precisa ficar sem cartas no deck e sem cartas na mão. Cartas vencedoras voltam para a mão; derrotadas são descartadas.
+        </div>
+      </aside>
+
+      <section class="arena" aria-label="Arena de batalha">
+        <div class="enemy-hand" id="enemyHand" aria-label="Cartas da IA"></div>
+        <div class="battle">
+          <div class="effects-layer" id="effectsLayer" aria-hidden="true"></div>
+          <div class="slot" id="playerSlot">Sua carta aparecerá aqui</div>
+          <div class="versus">
+            <span>VS</span>
+            <span class="result-pill" id="resultPill">Aguardando jogada</span>
+          </div>
+          <div class="slot enemy-slot" id="aiSlot">Carta da IA</div>
+        </div>
+        <div class="hand-wrap">
+          <div class="hand-title">
+            <strong>Sua mão</strong>
+            <span id="drawNotice">Escolha uma carta e confirme antes do tempo acabar</span>
+            <button class="btn primary" id="confirmBtn" type="button" disabled>Confirmar carta</button>
+          </div>
+          <div class="hand" id="playerHand"></div>
+        </div>
+      </section>
+
+      <aside class="log" aria-label="Histórico">
+        <h2>Histórico</h2>
+        <div class="feed" id="feed"></div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <h2 id="modalTitle">Regras</h2>
+      <p id="modalText"></p>
+      <button class="btn primary" id="modalClose" type="button">Continuar</button>
+    </div>
+  </div>
+
+  <script>
+    const rarityPower = { Comum: 1, Raro: 2, Epico: 3, Lendario: 4 };
+    const mantraCost = { Comum: 2, Raro: 5, Epico: 10, Lendario: 15 };
+    const MANTRA_MAX = 20;
+    const MANTRA_START = 10;
+    const MANTRA_BASE_REGEN = 1;
+    const rarityClass = { Comum: "common", Raro: "rare", Epico: "epic", Lendario: "legendary" };
+    const rarityGlow = {
+      Comum: "linear-gradient(135deg, rgba(99, 190, 123, .25), transparent 62%)",
+      Raro: "linear-gradient(135deg, rgba(99, 168, 232, .28), transparent 62%)",
+      Epico: "linear-gradient(135deg, rgba(169, 135, 217, .30), transparent 62%)",
+      Lendario: "linear-gradient(135deg, rgba(233, 180, 76, .34), transparent 62%)"
+    };
+
+    const catalog = [
+      ["Planta", "🌱", "Comum"], ["Agua", "💧", "Comum"], ["Fogo", "🔥", "Comum"], ["Vento", "🌪️", "Comum"], ["Pedra", "🪨", "Comum"],
+      ["Raio", "⚡", "Raro"], ["Gelo", "❄️", "Raro"], ["Nuvem", "☁️", "Raro"], ["Magma", "🌋", "Raro"], ["Oceano", "🌊", "Raro"],
+      ["Tempestade", "🌪️", "Epico"], ["Floresta", "🌳", "Epico"], ["Sol", "☀️", "Epico"], ["Lua", "🌑", "Epico"], ["Geleira", "🧊", "Epico"], ["Eclipse", "🌘", "Epico"],
+      ["Estrela", "⭐", "Lendario"], ["Mundo", "🌎", "Lendario"], ["Cosmos", "🌌", "Lendario"], ["Buraco Negro", "⚫", "Lendario"], ["Suprema", "⚖️", "Lendario"], ["Cometa", "☄️", "Lendario"], ["Tsunami", "🌊", "Lendario"]
+    ].map(([name, emoji, rarity]) => ({ name, emoji, rarity, power: rarityPower[rarity] }));
+
+    const advantages = {
+      Agua: ["Fogo"],
+      Fogo: ["Planta"],
+      Planta: ["Pedra"],
+      Pedra: ["Raio"],
+      Raio: ["Agua"],
+      Vento: ["Planta", "Nuvem"],
+      Gelo: ["Agua"],
+      Magma: ["Gelo", "Planta"],
+      Oceano: ["Magma", "Fogo"],
+      Tempestade: ["Vento", "Nuvem", "Agua"],
+      Sol: ["Gelo", "Geleira", "Planta"],
+      Lua: ["Oceano"],
+      Estrela: ["Sol"],
+      "Buraco Negro": ["Estrela", "Mundo"],
+      Cosmos: ["Buraco Negro", "Suprema"],
+      Suprema: ["Planta", "Agua", "Fogo", "Vento", "Pedra", "Raio", "Gelo", "Nuvem", "Magma", "Oceano", "Tempestade", "Floresta", "Sol", "Lua", "Geleira", "Eclipse", "Estrela", "Mundo", "Buraco Negro", "Cometa", "Tsunami"],
+      Floresta: ["Pedra", "Planta", "Vento"],
+      Geleira: ["Agua", "Oceano"],
+      Mundo: ["Planta", "Agua", "Fogo", "Vento", "Pedra"],
+      Tsunami: ["Fogo", "Pedra", "Magma"]
+    };
+
+    const evolution = {
+      Agua: "Oceano",
+      Pedra: "Mundo",
+      Raio: "Tempestade",
+      Planta: "Floresta",
+      Fogo: "Magma",
+      Vento: "Tempestade",
+      Gelo: "Geleira",
+      Nuvem: "Tempestade",
+      Sol: "Estrela",
+      Lua: "Cosmos"
+    };
+
+    const state = {
+      turn: 1,
+      locked: false,
+      player: createPlayerState(),
+      ai: createPlayerState(),
+      selected: null,
+      aiCard: null,
+      pendingCardId: null,
+      phase: "choose",
+      turnDeadline: 0,
+      aiDeadline: 0,
+      musicStarted: false,
+      menuMusicStarted: false,
+      handAvailability: "",
+      lastTick: performance.now(),
+      over: false
+    };
+
+    const els = {
+      turnLabel: document.getElementById("turnLabel"),
+      turnTimer: document.getElementById("turnTimer"),
+      stateLabel: document.getElementById("stateLabel"),
+      playerMantraMeter: document.getElementById("playerMantraMeter"),
+      aiMantraMeter: document.getElementById("aiMantraMeter"),
+      playerMantraCount: document.getElementById("playerMantraCount"),
+      aiMantraCount: document.getElementById("aiMantraCount"),
+      playerMantraStatus: document.getElementById("playerMantraStatus"),
+      aiMantraStatus: document.getElementById("aiMantraStatus"),
+      playerDeckMeter: document.getElementById("playerDeckMeter"),
+      playerHandMeter: document.getElementById("playerHandMeter"),
+      aiDeckMeter: document.getElementById("aiDeckMeter"),
+      aiHandMeter: document.getElementById("aiHandMeter"),
+      playerDeckCount: document.getElementById("playerDeckCount"),
+      playerHandCount: document.getElementById("playerHandCount"),
+      aiDeckCount: document.getElementById("aiDeckCount"),
+      aiHandCount: document.getElementById("aiHandCount"),
+      enemyHand: document.getElementById("enemyHand"),
+      playerHand: document.getElementById("playerHand"),
+      playerSlot: document.getElementById("playerSlot"),
+      aiSlot: document.getElementById("aiSlot"),
+      resultPill: document.getElementById("resultPill"),
+      effectsLayer: document.getElementById("effectsLayer"),
+      confirmBtn: document.getElementById("confirmBtn"),
+      menuSoundBtn: document.getElementById("menuSoundBtn"),
+      battleSoundBtn: document.getElementById("battleSoundBtn"),
+      feed: document.getElementById("feed"),
+      modal: document.getElementById("modal"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalText: document.getElementById("modalText")
+    };
+
+    const mainMenu = document.getElementById("mainMenu");
+    const menuWater = document.getElementById("menuWater");
+    const menuFire = document.getElementById("menuFire");
+    const menuClashLabel = document.getElementById("menuClashLabel");
+
+    function createPlayerState() {
+      return { deck: [], hand: [], discard: [], mantra: createMantraState() };
+    }
+
+    function createMantraState() {
+      return {
+        value: MANTRA_START,
+        fullTime: 0,
+        leakTime: 0,
+        leaking: false,
+        purge: false
+      };
+    }
+
+    function cardByName(name) {
+      return catalog.find(card => card.name === name);
+    }
+
+    function cloneCard(base) {
+      return {
+        id: crypto.randomUUID(),
+        name: base.name,
+        emoji: base.emoji,
+        rarity: base.rarity,
+        power: base.power,
+        wins: 0
+      };
+    }
+
+    function makeDeck() {
+      const weighted = [];
+      for (const card of catalog) {
+        const copies = card.rarity === "Comum" ? 4 : card.rarity === "Raro" ? 3 : card.rarity === "Epico" ? 2 : 1;
+        for (let i = 0; i < copies; i++) weighted.push(card);
+      }
+      shuffle(weighted);
+      return weighted.slice(0, 30).map(cloneCard);
+    }
+
+    function shuffle(items) {
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      return items;
+    }
+
+    function draw(player, count = 1) {
+      const drawn = [];
+      for (let i = 0; i < count; i++) {
+        if (!player.deck.length) break;
+        const card = player.deck.shift();
+        player.hand.push(card);
+        drawn.push(card);
+      }
+      return drawn;
+    }
+
+    function startGame() {
+      stopMenuMusic();
+      mainMenu.hidden = true;
+      state.turn = 1;
+      state.locked = false;
+      state.over = false;
+      state.player = createPlayerState();
+      state.ai = createPlayerState();
+      state.player.deck = makeDeck();
+      state.ai.deck = makeDeck();
+      state.selected = null;
+      state.aiCard = null;
+      state.pendingCardId = null;
+      state.phase = "choose";
+      state.aiDeadline = 0;
+      state.lastTick = performance.now();
+      startMusic(true);
+      draw(state.player, 6);
+      draw(state.ai, 6);
+      els.feed.innerHTML = "";
+      els.modal.classList.remove("open");
+      addLog("Partida iniciada. Cada jogador comprou 6 cartas.");
+      beginPlayerTurn();
+      updateSlots();
+      render();
+    }
+
+    function render() {
+      els.turnLabel.textContent = `Turno ${state.turn}`;
+      els.stateLabel.textContent = state.over ? "Partida finalizada" : state.phase === "ai" ? "IA está pensando" : state.phase === "confirm" ? "Confirme sua carta" : state.locked ? "Batalha em resolução" : "Escolha uma carta para batalhar";
+      renderTurnControls();
+      renderMeters();
+      renderEnemyHand();
+      renderPlayerHand();
+    }
+
+    function renderTurnControls() {
+      const candidate = state.player.hand.find(card => card.id === state.pendingCardId);
+      els.confirmBtn.disabled = state.phase !== "confirm" || !candidate;
+      els.confirmBtn.textContent = state.phase === "ai" ? "IA pensando" : "Confirmar carta";
+      if (state.phase === "ai") {
+        els.turnTimer.textContent = Math.max(0, Math.ceil((state.turnDeadline - performance.now()) / 1000));
+      } else if (state.phase === "choose" || state.phase === "confirm") {
+        els.turnTimer.textContent = Math.max(0, Math.ceil((state.turnDeadline - performance.now()) / 1000));
+      }
+    }
+
+    function beginPlayerTurn() {
+      state.phase = "choose";
+      state.pendingCardId = null;
+      state.turnDeadline = performance.now() + 60000;
+      state.aiDeadline = 0;
+      els.turnTimer.textContent = "60";
+    }
+
+    function renderMeters() {
+      const setMeter = (meter, count, max) => meter.style.width = `${Math.max(0, Math.min(100, count / max * 100))}%`;
+      els.playerMantraCount.textContent = state.player.mantra.value.toFixed(1);
+      els.aiMantraCount.textContent = state.ai.mantra.value.toFixed(1);
+      els.playerDeckCount.textContent = state.player.deck.length;
+      els.playerHandCount.textContent = state.player.hand.length;
+      els.aiDeckCount.textContent = state.ai.deck.length;
+      els.aiHandCount.textContent = state.ai.hand.length;
+      setMeter(els.playerMantraMeter, state.player.mantra.value, MANTRA_MAX);
+      setMeter(els.aiMantraMeter, state.ai.mantra.value, MANTRA_MAX);
+      setMeter(els.playerDeckMeter, state.player.deck.length, 30);
+      setMeter(els.playerHandMeter, state.player.hand.length, 14);
+      setMeter(els.aiDeckMeter, state.ai.deck.length, 30);
+      setMeter(els.aiHandMeter, state.ai.hand.length, 14);
+      els.playerMantraStatus.textContent = mantraStatus(state.player.mantra);
+      els.aiMantraStatus.textContent = mantraStatus(state.ai.mantra);
+    }
+
+    function mantraStatus(mantra) {
+      if (mantra.purge) return "Purga";
+      if (mantra.leaking) return `Vazando ${leakRate(mantra).toFixed(1)}/s`;
+      if (mantra.value >= MANTRA_MAX) return `Cheio ${Math.max(0, 5 - mantra.fullTime).toFixed(1)}s`;
+      return `Regenera ${MANTRA_BASE_REGEN.toFixed(1)}/s`;
+    }
+
+    function renderEnemyHand() {
+      els.enemyHand.innerHTML = "";
+      state.ai.hand.forEach(() => {
+        const back = document.createElement("div");
+        back.className = "card-back";
+        els.enemyHand.append(back);
+      });
+      if (!state.ai.hand.length) {
+        const empty = document.createElement("span");
+        empty.style.color = "var(--muted)";
+        empty.textContent = "IA sem cartas na mão";
+        els.enemyHand.append(empty);
+      }
+    }
+
+    function renderPlayerHand() {
+      els.playerHand.innerHTML = "";
+      state.player.hand.forEach(card => {
+        const node = cardNode(card);
+        node.type = "button";
+        const unavailable = !canPay(state.player, card);
+        node.disabled = state.locked || state.over || unavailable || state.phase === "ai";
+        if (node.disabled) node.classList.add("disabled");
+        if (unavailable) node.classList.add("unavailable");
+        if (card.id === state.pendingCardId) node.classList.add("selected");
+        node.addEventListener("click", () => selectCard(card.id));
+        els.playerHand.append(node);
+      });
+      if (!state.player.hand.length) {
+        const empty = document.createElement("div");
+        empty.className = "event";
+        empty.textContent = "Você está sem cartas na mão.";
+        els.playerHand.append(empty);
+      }
+      state.handAvailability = playerHandAvailability();
+    }
+
+    function playerHandAvailability() {
+      return state.player.hand
+        .map(card => `${card.id}:${canPay(state.player, card) ? "ready" : "waiting"}`)
+        .join("|");
+    }
+
+    function cardNode(card) {
+      const node = document.createElement("button");
+      node.className = `card ${rarityClass[card.rarity]}`;
+      node.style.setProperty("--glow", rarityGlow[card.rarity]);
+      node.innerHTML = `
+        <span class="rarity"><span>${card.rarity}</span><span class="cost">${mantraCost[card.rarity]} Mantra</span></span>
+        <span class="emoji">${card.emoji}</span>
+        <span class="name">${card.name}</span>
+        <span class="stats"><span>Poder ${card.power}</span><span>Abates ${card.wins}/3</span></span>
+      `;
+      return node;
+    }
+
+    function specialText(card) {
+      if (card.name === "Cometa") return "poder puro";
+      if (card.name === "Eclipse") return "anula astros";
+      if (card.name === "Tsunami") return "varre fogo";
+      if (card.name === "Suprema") return "domina";
+      if (card.name === "Cosmos") return "contém";
+      return "lógica";
+    }
+
+    function selectCard(cardId) {
+      if (state.locked || state.over || state.phase === "ai") return;
+      const playerIndex = state.player.hand.findIndex(card => card.id === cardId);
+      if (playerIndex < 0) return;
+      const playerCard = state.player.hand[playerIndex];
+      if (!canPay(state.player, playerCard)) {
+        addLog(`Mantra insuficiente para jogar ${label(playerCard)}. Aguarde regenerar.`);
+        render();
+        return;
+      }
+      state.pendingCardId = cardId;
+      state.phase = "confirm";
+      updateSlots();
+      render();
+    }
+
+    function confirmTurn() {
+      if (state.locked || state.over || state.phase !== "confirm") return;
+      const playerIndex = state.player.hand.findIndex(card => card.id === state.pendingCardId);
+      if (playerIndex < 0) return;
+      const playerCard = state.player.hand[playerIndex];
+      if (!canPay(state.player, playerCard)) return;
+      if (!state.ai.hand.length) {
+        checkGameOver();
+        return;
+      }
+      state.locked = true;
+      state.phase = "ai";
+      state.pendingCardId = null;
+      spendMantra(state.player, playerCard);
+      state.player.hand.splice(playerIndex, 1);
+      state.selected = playerCard;
+      const aiCard = chooseAiCard(playerCard);
+      // Mantém o limite de 5 a 50 segundos, mas favorece decisões mais rápidas.
+      const thinkingSeconds = 5 + Math.floor(Math.random() * Math.random() * 46);
+      const thinkingTime = thinkingSeconds * 1000;
+      state.turnDeadline = performance.now() + 60000;
+      state.aiDeadline = performance.now() + thinkingTime;
+      updateSlots();
+      render();
+      window.setTimeout(() => finishAiThinking(playerCard, aiCard), thinkingTime);
+    }
+
+    function finishAiThinking(playerCard, aiCard) {
+      if (state.over || state.selected !== playerCard) return;
+      if (!aiCard) {
+        state.aiCard = null;
+        updateSlots();
+        triggerCardEffect(playerCard, "player");
+        render();
+        window.setTimeout(() => resolveAiPass(playerCard), 1400);
+        return;
+      }
+      spendMantra(state.ai, aiCard);
+      state.ai.hand = state.ai.hand.filter(card => card.id !== aiCard.id);
+      state.aiCard = aiCard;
+      updateSlots();
+      triggerCardEffect(playerCard, "player");
+      triggerCardEffect(aiCard, "ai");
+      render();
+      window.setTimeout(() => resolveBattle(playerCard, aiCard), 1800);
+    }
+
+    function chooseAiCard(playerCard) {
+      const roll = Math.random();
+      const hand = state.ai.hand.filter(card => canPay(state.ai, card));
+      if (!hand.length) return null;
+      const legendary = hand.find(card => card.rarity === "Lendario");
+      if (roll < .15 && legendary && hand.length > 1) {
+        const nonLegendary = hand.filter(card => card.rarity !== "Lendario");
+        return nonLegendary[Math.floor(Math.random() * nonLegendary.length)];
+      }
+      if (roll < .75) {
+        return hand
+          .map(card => ({ card, score: aiScore(card, playerCard) }))
+          .sort((a, b) => b.score - a.score)[0].card;
+      }
+      return hand[Math.floor(Math.random() * hand.length)];
+    }
+
+    function aiScore(aiCard, playerCard) {
+      const outcome = compare(aiCard, playerCard);
+      const base = outcome.winner === "a" ? 100 : outcome.winner === "draw" ? 40 : 0;
+      const keepPenalty = aiCard.rarity === "Lendario" ? -12 : 0;
+      return base + aiCard.power * 4 + aiCard.wins * 2 + keepPenalty;
+    }
+
+    function canPay(owner, card) {
+      return owner.mantra.value >= mantraCost[card.rarity];
+    }
+
+    function spendMantra(owner, card) {
+      owner.mantra.value = Math.max(0, owner.mantra.value - mantraCost[card.rarity]);
+      owner.mantra.fullTime = 0;
+      owner.mantra.leakTime = 0;
+      owner.mantra.leaking = false;
+      owner.mantra.purge = false;
+    }
+
+    function resolveAiPass(playerCard) {
+      rewardWinner(playerCard, state.player);
+      const burned = state.ai.deck.shift();
+      if (burned) state.ai.discard.push(burned);
+      els.resultPill.textContent = "IA sem Mantra";
+      addLog(`IA não tinha Mantra para responder. ${label(playerCard)} voltou para sua mão e ${burned ? label(burned) + " foi descartada do deck da IA" : "a IA não tinha deck para perder"}.`);
+      state.locked = false;
+      checkGameOver();
+      if (!state.over) nextTurn("a");
+      render();
+    }
+
+    function resolveBattle(playerCard, aiCard) {
+      const outcome = compare(playerCard, aiCard);
+      let message = "";
+      if (outcome.winner === "a") {
+        rewardWinner(playerCard, state.player);
+        state.ai.discard.push(aiCard);
+        message = `Você venceu: ${label(playerCard)} derrotou ${label(aiCard)}. ${outcome.reason}`;
+      } else if (outcome.winner === "b") {
+        rewardWinner(aiCard, state.ai);
+        state.player.discard.push(playerCard);
+        message = `IA venceu: ${label(aiCard)} derrotou ${label(playerCard)}. ${outcome.reason}`;
+      } else {
+        state.player.discard.push(playerCard);
+        state.ai.discard.push(aiCard);
+        message = `Empate: ${label(playerCard)} e ${label(aiCard)} foram descartadas. ${outcome.reason}`;
+      }
+      els.resultPill.textContent = outcome.winner === "a" ? "Você venceu" : outcome.winner === "b" ? "IA venceu" : "Empate";
+      addLog(message);
+      state.locked = false;
+      checkGameOver();
+      if (!state.over) nextTurn(outcome.winner);
+      render();
+    }
+
+    function compare(a, b) {
+      const eclipseA = a.name === "Eclipse" && ["Sol", "Lua"].includes(b.name);
+      const eclipseB = b.name === "Eclipse" && ["Sol", "Lua"].includes(a.name);
+      if (eclipseA) return { winner: "a", reason: "Eclipse anulou Sol/Lua." };
+      if (eclipseB) return { winner: "b", reason: "Eclipse anulou Sol/Lua." };
+
+      if (a.name === "Cometa" || b.name === "Cometa") {
+        return comparePower(a, b, "Cometa ignora vantagem lógica.");
+      }
+
+      if (beats(a.name, b.name)) return { winner: "a", reason: `${a.name} tem vantagem lógica sobre ${b.name}.` };
+      if (beats(b.name, a.name)) return { winner: "b", reason: `${b.name} tem vantagem lógica sobre ${a.name}.` };
+      return comparePower(a, b, "Sem vantagem direta; poder base decidiu.");
+    }
+
+    function comparePower(a, b, reason) {
+      if (a.power > b.power) return { winner: "a", reason };
+      if (b.power > a.power) return { winner: "b", reason };
+      if (a.wins > b.wins) return { winner: "a", reason: `${reason} Abates acumulados decidiram.` };
+      if (b.wins > a.wins) return { winner: "b", reason: `${reason} Abates acumulados decidiram.` };
+      return { winner: "draw", reason: `${reason} Poder empatado.` };
+    }
+
+    function beats(attacker, defender) {
+      return (advantages[attacker] || []).includes(defender);
+    }
+
+    function rewardWinner(card, owner) {
+      card.wins += 1;
+      const evolved = maybeEvolve(card);
+      owner.hand.push(evolved);
+    }
+
+    function maybeEvolve(card) {
+      if (card.wins < 3 || !evolution[card.name]) return card;
+      const next = cardByName(evolution[card.name]);
+      const evolved = cloneCard(next);
+      evolved.wins = 0;
+      addLog(`${label(card)} evoluiu para ${label(evolved)}.`);
+      return evolved;
+    }
+
+    function nextTurn(winner) {
+      state.turn += 1;
+      let playerDraw = [];
+      let aiDraw = [];
+
+      if (winner === "a") {
+        playerDraw = draw(state.player, 1);
+        addLog(`Recompensa: você ${playerDraw.length ? "comprou " + label(playerDraw[0]) : "tentou comprar, mas o deck está vazio"}; IA perdeu a compra.`);
+      } else if (winner === "b") {
+        aiDraw = draw(state.ai, 1);
+        addLog(`Recompensa: IA ${aiDraw.length ? "comprou 1 carta" : "tentou comprar, mas o deck está vazio"}; você perdeu a compra.`);
+      } else {
+        addLog("Empate: ninguém comprou carta neste turno.");
+      }
+
+      exhaustIfEmptyHand(state.player, "Você");
+      exhaustIfEmptyHand(state.ai, "IA");
+      checkGameOver();
+      if (!state.over) {
+        state.selected = null;
+        state.aiCard = null;
+        beginPlayerTurn();
+      }
+    }
+
+    function exhaustIfEmptyHand(player, name) {
+      if (player.hand.length || !player.deck.length) return;
+      const burned = player.deck.splice(0);
+      player.discard.push(...burned);
+      addLog(`${name} ficou sem cartas na mão e perdeu o restante do deck por exaustão (${burned.length} cartas).`);
+    }
+
+    function leakRate(mantra) {
+      if (!mantra.leaking && !mantra.purge) return 0;
+      return Math.min(1, .1 + Math.floor(mantra.leakTime / 10) * .1);
+    }
+
+    function tickMantra() {
+      const now = performance.now();
+      const delta = Math.min(.5, (now - state.lastTick) / 1000);
+      state.lastTick = now;
+      if (!state.over) {
+        if (state.phase === "choose" || state.phase === "confirm") {
+          updateMantra(state.player.mantra, delta);
+        } else if (state.phase === "ai") {
+          updateMantra(state.ai.mantra, delta);
+        }
+      }
+      renderMeters();
+      tickTurnTimer();
+      if (!state.locked && !state.over && state.handAvailability !== playerHandAvailability()) {
+        renderPlayerHand();
+      }
+    }
+
+    function tickTurnTimer() {
+      if (state.over || mainMenu.hidden === false) return;
+      if (state.phase === "ai") {
+        renderTurnControls();
+        return;
+      }
+      if (state.phase !== "choose" && state.phase !== "confirm") return;
+      const remaining = state.turnDeadline - performance.now();
+      if (remaining > 0) {
+        renderTurnControls();
+        return;
+      }
+      const playable = state.player.hand.filter(card => canPay(state.player, card));
+      if (!playable.length) {
+        addLog("Tempo encerrado, mas você não tinha Mantra para jogar. O cronômetro reiniciou.");
+        beginPlayerTurn();
+        render();
+        return;
+      }
+      const automatic = playable[Math.floor(Math.random() * playable.length)];
+      state.pendingCardId = automatic.id;
+      state.phase = "confirm";
+      addLog(`Tempo encerrado. ${label(automatic)} foi confirmada automaticamente.`);
+      confirmTurn();
+    }
+
+    function updateMantra(mantra, delta) {
+      if (mantra.purge) {
+        mantra.value = Math.max(0, mantra.value - delta);
+        if (mantra.value < 15) {
+          mantra.purge = false;
+          mantra.leaking = false;
+          mantra.leakTime = 0;
+          mantra.fullTime = 0;
+        }
+        return;
+      }
+
+      if (mantra.leaking) {
+        mantra.leakTime += delta;
+        const leak = leakRate(mantra);
+        if (leak >= 1) {
+          mantra.purge = true;
+          return;
+        }
+        const regen = Math.max(0, MANTRA_BASE_REGEN - leak);
+        mantra.value = Math.max(0, Math.min(MANTRA_MAX, mantra.value + (regen - leak) * delta));
+        return;
+      }
+
+      if (mantra.value >= MANTRA_MAX) {
+        mantra.value = MANTRA_MAX;
+        mantra.fullTime += delta;
+        if (mantra.fullTime >= 5) {
+          mantra.leaking = true;
+          mantra.leakTime = 0;
+        }
+        return;
+      }
+
+      mantra.fullTime = 0;
+      mantra.value = Math.min(MANTRA_MAX, mantra.value + MANTRA_BASE_REGEN * delta);
+    }
+
+    function triggerCardEffect(card, side) {
+      const rect = els.effectsLayer.getBoundingClientRect();
+      const x = side === "player" ? rect.width * .29 : rect.width * .71;
+      const y = rect.height * .55;
+      const count = card.rarity === "Comum" ? 34 : card.rarity === "Raro" ? 24 : 1;
+
+      if (card.rarity === "Epico") {
+        for (let i = 0; i < 6; i++) createEffect("fx-ring", x, y, 120 + i * 48);
+        return;
+      }
+
+      if (card.rarity === "Lendario") {
+        for (let i = 0; i < 3; i++) createEffect("fx-meteor", x + (i - 1) * 95, y + (i - 1) * 20, 0);
+        document.body.classList.add("shake");
+        window.setTimeout(() => document.body.classList.remove("shake"), 980);
+        for (let i = 0; i < 24; i++) {
+          const angle = (Math.PI * 2 / 24) * i;
+          createCrack(x + (Math.random() - .5) * 50, y + (Math.random() - .5) * 30, angle, 110 + Math.random() * 210);
+        }
+        return;
+      }
+
+      for (let i = 0; i < count; i++) createEffect("fx-dot", x, y, 11 + Math.random() * 25, rarityClass[card.rarity]);
+    }
+
+    function createEffect(type, x, y, size, rarity = "") {
+      const effect = document.createElement("i");
+      effect.className = `${type} ${rarity}`;
+      effect.style.setProperty("--x", `${x + (Math.random() - .5) * 30}px`);
+      effect.style.setProperty("--y", `${y + (Math.random() - .5) * 26}px`);
+      effect.style.setProperty("--s", `${size}px`);
+      effect.style.setProperty("--dx", `${(Math.random() - .5) * 270}px`);
+      effect.style.setProperty("--dy", `${(Math.random() - .5) * 190}px`);
+      els.effectsLayer.append(effect);
+      window.setTimeout(() => effect.remove(), 5000);
+    }
+
+    function createCrack(x, y, radians, width) {
+      const crack = document.createElement("i");
+      crack.className = "fx-crack";
+      crack.style.setProperty("--x", `${x}px`);
+      crack.style.setProperty("--y", `${y}px`);
+      crack.style.setProperty("--w", `${width}px`);
+      crack.style.setProperty("--r", `${radians}rad`);
+      els.effectsLayer.append(crack);
+      window.setTimeout(() => crack.remove(), 6000);
+    }
+
+    function checkGameOver() {
+      const playerOut = state.player.deck.length === 0 && state.player.hand.length === 0;
+      const aiOut = state.ai.deck.length === 0 && state.ai.hand.length === 0;
+      if (!playerOut && !aiOut) return false;
+      state.over = true;
+      const title = aiOut && playerOut ? "Empate total" : aiOut ? "Você venceu" : "IA venceu";
+      const text = aiOut && playerOut
+        ? "Os dois lados ficaram sem deck e sem mão no mesmo ciclo."
+        : aiOut
+          ? "O deck e a mão da IA foram esvaziados."
+          : "Você ficou sem deck e sem cartas na mão.";
+      openModal(title, text);
+      addLog(`${title}. ${text}`);
+      return true;
+    }
+
+    function updateSlots() {
+      els.playerSlot.innerHTML = "";
+      els.aiSlot.innerHTML = "";
+      const displayedPlayerCard = state.selected || state.player.hand.find(card => card.id === state.pendingCardId);
+      if (displayedPlayerCard) {
+        const p = cardNode(displayedPlayerCard);
+        p.classList.add("disabled");
+        els.playerSlot.append(p);
+      } else {
+        els.playerSlot.textContent = "Sua carta aparecerá aqui";
+      }
+      if (state.aiCard) {
+        const a = cardNode(state.aiCard);
+        a.classList.add("disabled");
+        els.aiSlot.append(a);
+      } else {
+        els.aiSlot.textContent = "Carta da IA";
+      }
+    }
+
+    function addLog(text) {
+      const node = document.createElement("div");
+      node.className = "event";
+      node.innerHTML = text.replace(/Você venceu|IA venceu|Empate total|Empate|evoluiu/g, match => `<strong>${match}</strong>`);
+      els.feed.prepend(node);
+    }
+
+    function label(card) {
+      return `${card.emoji} ${card.name}`;
+    }
+
+    function openModal(title, text) {
+      els.modalTitle.textContent = title;
+      els.modalText.textContent = text;
+      els.modal.classList.add("open");
+    }
+
+    function startMusic(reset = false) {
+      const music = document.getElementById("battleMusic");
+      if (reset) {
+        music.pause();
+        music.currentTime = 0;
+        state.musicStarted = false;
+      }
+      if (!music.paused) {
+        state.musicStarted = true;
+        updateSoundButtons();
+        return;
+      }
+      music.volume = .55;
+      music.muted = false;
+      const playAttempt = music.play();
+      if (playAttempt && typeof playAttempt.then === "function") {
+        playAttempt
+          .then(() => { state.musicStarted = true; updateSoundButtons(); })
+          .catch(() => updateSoundButtons());
+      } else {
+        state.musicStarted = true;
+        updateSoundButtons();
+      }
+    }
+
+    function startMenuMusic(reset = false) {
+      if (mainMenu.hidden) return;
+      const music = document.getElementById("menuMusic");
+      if (reset) {
+        music.pause();
+        music.currentTime = 0;
+        state.menuMusicStarted = false;
+      }
+      if (!music.paused) {
+        state.menuMusicStarted = true;
+        updateSoundButtons();
+        return;
+      }
+      music.volume = .45;
+      music.muted = false;
+      const playAttempt = music.play();
+      if (playAttempt && typeof playAttempt.then === "function") {
+        playAttempt.then(() => { state.menuMusicStarted = true; updateSoundButtons(); }).catch(() => updateSoundButtons());
+      } else {
+        state.menuMusicStarted = true;
+        updateSoundButtons();
+      }
+    }
+
+    function stopMenuMusic() {
+      const music = document.getElementById("menuMusic");
+      music.pause();
+      music.currentTime = 0;
+      state.menuMusicStarted = false;
+      updateSoundButtons();
+    }
+
+    function updateSoundButtons() {
+      const menuPaused = document.getElementById("menuMusic").paused;
+      const battlePaused = document.getElementById("battleMusic").paused;
+      els.menuSoundBtn.textContent = menuPaused ? "🔇" : "🔊";
+      els.battleSoundBtn.textContent = battlePaused ? "🔇" : "🔊";
+    }
+
+    function activateCurrentMusic() {
+      if (mainMenu.hidden) startMusic();
+      else startMenuMusic();
+    }
+
+    function setupMenuClash() {
+      const options = catalog.filter(card => card.name !== "Eclipse");
+      const first = options[Math.floor(Math.random() * options.length)];
+      const alternatives = options.filter(card => card.name !== first.name);
+      const second = alternatives[Math.floor(Math.random() * alternatives.length)];
+      menuWater.textContent = first.emoji;
+      menuFire.textContent = second.emoji;
+      menuClashLabel.textContent = `${first.name.toUpperCase()} VS ${second.name.toUpperCase()}`;
+    }
+
+    document.getElementById("startBattleBtn").addEventListener("click", startGame);
+    document.getElementById("restartBtn").addEventListener("click", startGame);
+    els.menuSoundBtn.addEventListener("click", activateCurrentMusic);
+    els.battleSoundBtn.addEventListener("click", activateCurrentMusic);
+    els.confirmBtn.addEventListener("click", confirmTurn);
+    document.getElementById("rulesBtn").addEventListener("click", () => {
+      startMusic();
+      openModal("Regras", "Escolha uma carta por turno. A IA responde com uma carta da mão dela. Vantagem lógica vence; sem vantagem, o poder da raridade desempata. A vencedora volta para a mão e compra 1 carta. A derrotada é descartada e não compra. Se alguém ficar sem mão, perde o deck restante por exaustão.");
+    });
+    document.getElementById("modalClose").addEventListener("click", () => els.modal.classList.remove("open"));
+    document.addEventListener("pointerdown", () => {
+      if (mainMenu.hidden) startMusic();
+      else startMenuMusic();
+    }, { capture: true });
+
+    document.addEventListener("click", () => {
+      if (mainMenu.hidden) startMusic();
+      else startMenuMusic();
+    }, { capture: true });
+
+    document.addEventListener("keydown", () => {
+      if (mainMenu.hidden) startMusic();
+      else startMenuMusic();
+    }, { once: true });
+
+    window.addEventListener("pageshow", () => {
+      if (!mainMenu.hidden) {
+        startMenuMusic(true);
+      }
+    });
+
+    window.addEventListener("focus", startMenuMusic);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) return;
+      if (mainMenu.hidden) startMusic();
+      else startMenuMusic(true);
+    });
+
+    const canvas = document.getElementById("field");
+    const ctx = canvas.getContext("2d");
+    let motes = [];
+
+    function resizeCanvas() {
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * ratio);
+      canvas.height = Math.floor(window.innerHeight * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      motes = Array.from({ length: Math.min(80, Math.floor(window.innerWidth / 16)) }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: 1 + Math.random() * 3,
+        vx: -.25 + Math.random() * .5,
+        vy: .12 + Math.random() * .55,
+        hue: [40, 145, 204, 272][Math.floor(Math.random() * 4)]
+      }));
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      for (const mote of motes) {
+        mote.x += mote.vx;
+        mote.y += mote.vy;
+        if (mote.y > window.innerHeight + 20) mote.y = -20;
+        if (mote.x < -20) mote.x = window.innerWidth + 20;
+        if (mote.x > window.innerWidth + 20) mote.x = -20;
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${mote.hue}, 70%, 68%, .32)`;
+        ctx.arc(mote.x, mote.y, mote.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    animate();
+    setupMenuClash();
+    startMenuMusic(true);
+    window.setInterval(tickMantra, 100);
+  </script>
+</body>
+</html>
