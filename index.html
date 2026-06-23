@@ -125,6 +125,43 @@
       justify-content: flex-end;
     }
 
+    .star-coins {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-width: 154px;
+      padding: 7px 10px;
+      border: 1px solid rgba(233, 180, 76, .42);
+      border-radius: 8px;
+      background: rgba(51, 39, 20, .64);
+      box-shadow: inset 0 0 18px rgba(233, 180, 76, .1);
+      color: #fff0bd;
+      font-size: .72rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .coin-icon {
+      width: 38px;
+      aspect-ratio: 1;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 12px rgba(99, 168, 232, .7), 0 3px 8px rgba(0, 0, 0, .45);
+    }
+
+    .coin-copy {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .star-coins b {
+      color: var(--gold);
+      font-size: 1.28rem;
+      font-variant-numeric: tabular-nums;
+    }
+
     .sound-button,
     .menu-sound-button {
       display: grid;
@@ -207,6 +244,64 @@
       border-color: #e9b44c;
       color: #160f08;
       font-weight: 800;
+    }
+
+    #discardBtn {
+      position: relative;
+      overflow: visible;
+    }
+
+    #discardBtn.crack-1,
+    #discardBtn.crack-2 {
+      background-color: #3b3032;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    #discardBtn.crack-1 {
+      background-image: linear-gradient(126deg, transparent 45%, rgba(8, 8, 10, .92) 46% 49%, transparent 50%);
+    }
+
+    #discardBtn.crack-2 {
+      background-image:
+        linear-gradient(126deg, transparent 45%, rgba(8, 8, 10, .92) 46% 49%, transparent 50%),
+        linear-gradient(45deg, transparent 54%, rgba(8, 8, 10, .92) 55% 58%, transparent 59%);
+      border-color: rgba(220, 107, 93, .72);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 0 13px rgba(220,107,93,.25);
+    }
+
+    #discardBtn.broken {
+      min-width: 112px;
+      border-color: transparent;
+      background: transparent;
+      color: transparent;
+      cursor: not-allowed;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    #discardBtn.broken::before,
+    #discardBtn.broken::after {
+      content: "";
+      position: absolute;
+      top: 15px;
+      width: 31px;
+      height: 17px;
+      background: #4a525e;
+      border: 1px solid rgba(246,240,223,.25);
+      box-shadow: 19px -7px 0 -5px #717a86, 47px 4px 0 -4px #303741, 67px -5px 0 -6px #929ba7;
+      clip-path: polygon(4% 13%, 81% 0, 100% 68%, 58% 100%, 0 75%);
+    }
+
+    #discardBtn.broken::before { left: 9px; transform: rotate(-13deg); }
+    #discardBtn.broken::after { right: 9px; transform: rotate(17deg) scale(.78); }
+
+    #discardBtn.shattering { animation: discardExplosion .52s ease-out; }
+
+    @keyframes discardExplosion {
+      0% { filter: brightness(1); transform: scale(1); }
+      45% { filter: brightness(2.7) saturate(.2); transform: scale(1.16); }
+      100% { filter: brightness(1); transform: scale(1); }
     }
 
     .board {
@@ -333,6 +428,91 @@
       font-size: .84rem;
       line-height: 1.45;
       margin-top: auto;
+    }
+
+    .putometer {
+      --put-color: #63be7b;
+      position: sticky;
+      top: 16px;
+      align-self: stretch;
+      flex: 0 0 385px;
+      display: grid;
+      justify-items: center;
+      gap: 9px;
+      min-height: 385px;
+      padding: 8px 8px 13px;
+      text-align: center;
+    }
+
+    .difficulty-name {
+      min-height: 42px;
+      margin-top: 10px;
+      color: var(--put-color);
+      font-size: 1.22rem;
+      font-weight: 900;
+      line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px #000, 0 0 11px color-mix(in srgb, var(--put-color) 65%, transparent);
+      transition: transform .35s ease, font-size .35s ease, color .35s ease, filter .35s ease;
+    }
+
+    .putometer-cylinder {
+      position: absolute;
+      inset: 68px 22px 34px;
+      overflow: hidden;
+      border: 2px solid color-mix(in srgb, var(--put-color) 76%, #ffffff 24%);
+      border-radius: 999px;
+      background: linear-gradient(90deg, #080a0c, #343c46 19%, #11161b 53%, #424b55 84%, #080a0c);
+      box-shadow: inset 10px 0 18px rgba(255,255,255,.14), inset -12px 0 22px rgba(0,0,0,.75), 0 0 25px color-mix(in srgb, var(--put-color) 32%, transparent);
+    }
+
+    .putometer-liquid {
+      position: absolute;
+      inset: auto 6px 6px;
+      height: calc((var(--difficulty-fill) * 1%) + 4px);
+      border-radius: 0 0 999px 999px;
+      background:
+        radial-gradient(circle at 23% 77%, rgba(255,255,255,.75) 0 3px, transparent 4px),
+        radial-gradient(circle at 68% 61%, rgba(255,255,255,.6) 0 4px, transparent 5px),
+        radial-gradient(circle at 45% 88%, rgba(255,255,255,.48) 0 2px, transparent 3px),
+        linear-gradient(180deg, color-mix(in srgb, var(--put-color) 55%, #ffffff 45%), var(--put-color) 48%, color-mix(in srgb, var(--put-color) 66%, #000000 34%));
+      box-shadow: inset 0 9px 16px rgba(255,255,255,.32), 0 -5px 12px color-mix(in srgb, var(--put-color) 55%, transparent);
+      transition: height .8s cubic-bezier(.2,.85,.24,1);
+      animation: putBubbles 2.3s ease-in-out infinite alternate;
+    }
+
+    .putometer-liquid::before {
+      content: "";
+      position: absolute;
+      inset: -9px -5px auto;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 15px color-mix(in srgb, var(--put-color) 65%, transparent);
+    }
+
+    @keyframes putBubbles {
+      from { transform: translateY(4px) scaleX(.98); filter: saturate(.9); }
+      to { transform: translateY(-5px) scaleX(1.02); filter: saturate(1.25); }
+    }
+
+    .putometer[data-level="1"] { --put-color: #ebd34a; }
+    .putometer[data-level="1"] .difficulty-name { transform: skewX(-10deg); }
+    .putometer[data-level="2"] { --put-color: #df4a4a; }
+    .putometer[data-level="2"] .difficulty-name { transform: skewX(-15deg) perspective(180px) rotateY(-13deg) scaleX(1.12); transform-origin: left center; font-size: 1.48rem; font-weight: 950; }
+    .putometer[data-level="3"] { --put-color: #a96ef5; }
+    .putometer[data-level="3"] .difficulty-name { transform: skewX(-20deg) perspective(180px) rotateY(-16deg) scaleX(1.24); transform-origin: left center; font-size: 1.78rem; font-weight: 950; }
+    .putometer[data-level="4"] { --put-color: #f2f2f2; }
+    .putometer[data-level="4"] .difficulty-name {
+      transform: skewX(-29deg) perspective(160px) rotateY(-21deg) scaleX(1.4);
+      transform-origin: left center;
+      color: transparent;
+      background: radial-gradient(circle at 18% 35%, #fff 0 2px, #050505 3px 10px, #fff 11px 12px, #050505 13px 22px, #fff 23px 24px, #050505 25px) center / 30px 30px;
+      background-clip: text;
+      -webkit-background-clip: text;
+      font-size: 2.02rem;
+      font-weight: 950;
+      text-shadow: 0 0 2px #fff, 1px 1px 0 #fff, -1px -1px 0 #fff, 0 0 9px #fff;
     }
 
     .arena {
@@ -548,6 +728,48 @@
       transform: translate(-50%, -50%);
       pointer-events: none;
     }
+
+    .fx-duel {
+      position: absolute;
+      z-index: 8;
+      left: 50%;
+      top: 50%;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+      font-size: clamp(2rem, 6vw, 5rem);
+      text-shadow: 0 0 22px currentColor;
+      animation: duelProjectile 1.8s ease-out forwards;
+    }
+
+    .fx-duel.nature { color: #8de08c; }
+    .fx-duel.water { color: #82d9ff; }
+    .fx-duel.fire { color: #ff8a45; }
+    .fx-duel.stone { color: #ded7c6; }
+    .fx-duel.lightning { color: #e9d8ff; }
+    .fx-duel.ice { color: #bff6ff; }
+    .fx-duel.magma { color: #ff3f2d; }
+    .fx-duel.ocean { color: #4ca9ff; }
+    .fx-duel.cosmic { color: #f6a8ff; }
+    .fx-duel.supreme { color: #ffe078; }
+
+    .slot .card.duel-win { animation: winnerPulse 1.8s ease-out; }
+    .slot .card.duel-lose { animation: loserExit 1.8s ease-in forwards; }
+    .slot .card.duel-freeze { filter: saturate(.4) brightness(1.5); }
+    .slot .card.duel-crush { transform: scaleX(.58) scaleY(.75) rotate(8deg); }
+    .slot .card.duel-wilt { filter: sepia(.7) saturate(.35); transform: rotate(16deg) scaleY(.75); }
+    .slot .card.duel-confused { animation: confusedStar 1.8s ease-in-out; }
+
+    @keyframes duelProjectile {
+      0% { opacity: 0; transform: translate(-440%, -50%) scale(.3) rotate(-18deg); }
+      20% { opacity: 1; }
+      70% { opacity: 1; transform: translate(340%, -50%) scale(1.4) rotate(18deg); }
+      100% { opacity: 0; transform: translate(420%, -50%) scale(2.3) rotate(30deg); }
+    }
+
+    @keyframes winnerPulse { 0%, 100% { transform: scale(1); } 35% { transform: scale(1.25) rotate(-6deg); filter: brightness(1.45); } }
+    @keyframes loserExit { 0% { opacity: 1; } 55% { transform: translateX(30px) rotate(16deg); } 100% { opacity: 0; transform: translateX(620px) rotate(45deg) scale(.4); } }
+    @keyframes confusedStar { 0%, 100% { transform: rotate(-4deg); } 30% { transform: rotate(12deg) translateY(-12px); } 65% { transform: rotate(-12deg) translateY(8px); } }
 
     .fx-dot {
       width: var(--s);
@@ -939,6 +1161,14 @@
         <span id="stateLabel">Escolha uma carta para batalhar</span>
       </div>
       <div class="actions">
+        <div class="star-coins" aria-label="Moeda Estelar acumulada">
+          <img class="coin-icon" src="moeda-estelar.png" alt="Moeda Estelar">
+          <div class="coin-copy">
+            <span>Moeda Estelar</span>
+            <small>Guardada nesta máquina</small>
+            <b id="starCoins">0</b>
+          </div>
+        </div>
         <button class="sound-button" id="battleSoundBtn" type="button" aria-label="Ativar música da batalha" title="Ativar música">🔊</button>
         <button class="btn" id="rulesBtn" type="button">Regras</button>
         <button class="btn primary" id="restartBtn" type="button">Nova partida</button>
@@ -964,6 +1194,11 @@
         <div class="tips" id="tipBox">
           Vitória: o adversário precisa ficar sem cartas no deck e sem cartas na mão. Cartas vencedoras voltam para a mão; derrotadas são descartadas.
         </div>
+        <section class="putometer" id="putometer" data-level="0" aria-label="Putômetro de dificuldade">
+          <strong class="difficulty-name" id="difficultyName">Normal</strong>
+          <div class="putometer-cylinder" aria-hidden="true"><div class="putometer-liquid"></div></div>
+          <small id="difficultyStage">Estágio 1 de 5</small>
+        </section>
       </aside>
 
       <section class="arena" aria-label="Arena de batalha">
@@ -981,6 +1216,7 @@
           <div class="hand-title">
             <strong>Sua mão</strong>
             <span id="drawNotice">Escolha uma carta e confirme antes do tempo acabar</span>
+            <button class="btn" id="discardBtn" type="button" disabled>Descartar</button>
             <button class="btn primary" id="confirmBtn" type="button" disabled>Confirmar carta</button>
           </div>
           <div class="hand" id="playerHand"></div>
@@ -1015,6 +1251,21 @@
       Epico: "linear-gradient(135deg, rgba(169, 135, 217, .30), transparent 62%)",
       Lendario: "linear-gradient(135deg, rgba(233, 180, 76, .34), transparent 62%)"
     };
+    const rarityChance = { Comum: .40, Raro: .30, Epico: .25, Lendario: .05 };
+    const STAR_COINS_KEY = "elementalDominionStarCoins";
+    const battleTracks = [
+      "elemental-dominion-versus.mp3",
+      "elemental-dominion-versus-2.mp3",
+      "elemental-dominion-versus-3.mp3",
+      "elemental-dominion-versus-4.mp3"
+    ];
+    const difficulties = [
+      { name: "Normal", min: 5, max: 50 },
+      { name: "Intermediário", min: 5, max: 40 },
+      { name: "Difícil", min: 5, max: 30 },
+      { name: "Insano", min: 5, max: 15 },
+      { name: "Bizarro", min: 5, max: 10 }
+    ];
 
     const catalog = [
       ["Planta", "🌱", "Comum"], ["Agua", "💧", "Comum"], ["Fogo", "🔥", "Comum"], ["Vento", "🌪️", "Comum"], ["Pedra", "🪨", "Comum"],
@@ -1072,9 +1323,13 @@
       aiDeadline: 0,
       musicStarted: false,
       menuMusicStarted: false,
+      battleTrack: "",
       handAvailability: "",
       lastTick: performance.now(),
-      over: false
+      discardInProgress: false,
+      over: false,
+      coins: Math.max(0, Number.parseInt(localStorage.getItem(STAR_COINS_KEY), 10) || 0),
+      difficulty: 0
     };
 
     const els = {
@@ -1102,12 +1357,17 @@
       resultPill: document.getElementById("resultPill"),
       effectsLayer: document.getElementById("effectsLayer"),
       confirmBtn: document.getElementById("confirmBtn"),
+      discardBtn: document.getElementById("discardBtn"),
       menuSoundBtn: document.getElementById("menuSoundBtn"),
       battleSoundBtn: document.getElementById("battleSoundBtn"),
       feed: document.getElementById("feed"),
       modal: document.getElementById("modal"),
       modalTitle: document.getElementById("modalTitle"),
-      modalText: document.getElementById("modalText")
+      modalText: document.getElementById("modalText"),
+      starCoins: document.getElementById("starCoins"),
+      putometer: document.getElementById("putometer"),
+      difficultyName: document.getElementById("difficultyName"),
+      difficultyStage: document.getElementById("difficultyStage")
     };
 
     const mainMenu = document.getElementById("mainMenu");
@@ -1115,8 +1375,40 @@
     const menuFire = document.getElementById("menuFire");
     const menuClashLabel = document.getElementById("menuClashLabel");
 
+    function renderCoins() {
+      els.starCoins.textContent = state.coins.toLocaleString("pt-BR");
+    }
+
+    function awardCoins(amount) {
+      state.coins += amount;
+      localStorage.setItem(STAR_COINS_KEY, String(state.coins));
+      renderCoins();
+      addLog(`⭐ Você recebeu ${amount.toLocaleString("pt-BR")} Moedas Estelares.`);
+    }
+
+    function setDifficulty(level) {
+      state.difficulty = Math.min(difficulties.length - 1, Math.max(0, level));
+      els.putometer.dataset.level = String(state.difficulty);
+      els.putometer.style.setProperty("--difficulty-fill", String(20 + state.difficulty * 20));
+      els.difficultyName.textContent = difficulties[state.difficulty].name;
+      els.difficultyStage.textContent = `Estágio ${state.difficulty + 1} de ${difficulties.length}`;
+    }
+
+    function changeDifficulty(amount, reason) {
+      const previous = state.difficulty;
+      setDifficulty(previous + amount);
+      if (state.difficulty !== previous) {
+        addLog(`Putômetro ${amount > 0 ? "subiu" : "desceu"} para ${difficulties[state.difficulty].name}: ${reason}.`);
+      }
+    }
+
+    function aiThinkingSeconds() {
+      const difficulty = difficulties[state.difficulty];
+      return difficulty.min + Math.floor(Math.random() * (difficulty.max - difficulty.min + 1));
+    }
+
     function createPlayerState() {
-      return { deck: [], hand: [], discard: [], mantra: createMantraState() };
+      return { deck: [], hand: [], discard: [], mantra: createMantraState(), usedLegendaries: new Set(), eclipsePairAvailable: false, discardUses: 0, discardBroken: false };
     }
 
     function createMantraState() {
@@ -1145,13 +1437,13 @@
     }
 
     function makeDeck() {
-      const weighted = [];
-      for (const card of catalog) {
-        const copies = card.rarity === "Comum" ? 4 : card.rarity === "Raro" ? 3 : card.rarity === "Epico" ? 2 : 1;
-        for (let i = 0; i < copies; i++) weighted.push(card);
-      }
-      shuffle(weighted);
-      return weighted.slice(0, 30).map(cloneCard);
+      const pools = Object.fromEntries(Object.keys(rarityChance).map(rarity => [rarity, catalog.filter(card => card.rarity === rarity && card.name !== "Eclipse")]));
+      return Array.from({ length: 30 }, () => {
+        const roll = Math.random();
+        const rarity = roll < rarityChance.Comum ? "Comum" : roll < .70 ? "Raro" : roll < .95 ? "Epico" : "Lendario";
+        const pool = pools[rarity];
+        return cloneCard(pool[Math.floor(Math.random() * pool.length)]);
+      });
     }
 
     function shuffle(items) {
@@ -1164,25 +1456,49 @@
 
     function draw(player, count = 1) {
       const drawn = [];
-      for (let i = 0; i < count; i++) {
-        if (!player.deck.length) break;
+      while (drawn.length < count && player.deck.length) {
         const card = player.deck.shift();
+        if (card.name === "Eclipse") {
+          player.discard.push(card);
+          continue;
+        }
         player.hand.push(card);
         drawn.push(card);
+        triggerDrawEffect();
       }
       return drawn;
     }
 
+    function drawRandom(player) {
+      while (player.deck.length) {
+        const index = Math.floor(Math.random() * player.deck.length);
+        const [card] = player.deck.splice(index, 1);
+        if (card.name === "Eclipse") {
+          player.discard.push(card);
+          continue;
+        }
+        player.hand.push(card);
+        triggerDrawEffect();
+        return card;
+      }
+      return null;
+    }
+
     function startGame() {
       stopMenuMusic();
+      selectBattleTrack();
       mainMenu.hidden = true;
       state.turn = 1;
       state.locked = false;
       state.over = false;
+      state.discardInProgress = false;
+      setDifficulty(0);
       state.player = createPlayerState();
       state.ai = createPlayerState();
       state.player.deck = makeDeck();
       state.ai.deck = makeDeck();
+      state.player.eclipsePairAvailable = state.player.deck.some(card => card.name === "Sol") && state.player.deck.some(card => card.name === "Lua");
+      state.ai.eclipsePairAvailable = state.ai.deck.some(card => card.name === "Sol") && state.ai.deck.some(card => card.name === "Lua");
       state.selected = null;
       state.aiCard = null;
       state.pendingCardId = null;
@@ -1212,7 +1528,13 @@
     function renderTurnControls() {
       const candidate = state.player.hand.find(card => card.id === state.pendingCardId);
       els.confirmBtn.disabled = state.phase !== "confirm" || !candidate;
+      els.discardBtn.disabled = state.phase !== "confirm" || !candidate || state.player.discardBroken;
       els.confirmBtn.textContent = state.phase === "ai" ? "IA pensando" : "Confirmar carta";
+      els.discardBtn.classList.toggle("crack-1", state.player.discardUses === 1 && !state.player.discardBroken);
+      els.discardBtn.classList.toggle("crack-2", state.player.discardUses === 2 && !state.player.discardBroken);
+      els.discardBtn.classList.toggle("broken", state.player.discardBroken);
+      els.discardBtn.textContent = state.player.discardBroken ? "Descarte quebrado" : `Descartar ${state.player.discardUses}/3`;
+      els.discardBtn.title = state.player.discardBroken ? "O descarte quebrou nesta partida" : `${3 - state.player.discardUses} descarte(s) restante(s)`;
       if (state.phase === "ai") {
         els.turnTimer.textContent = Math.max(0, Math.ceil((state.turnDeadline - performance.now()) / 1000));
       } else if (state.phase === "choose" || state.phase === "confirm") {
@@ -1323,6 +1645,13 @@
       const playerIndex = state.player.hand.findIndex(card => card.id === cardId);
       if (playerIndex < 0) return;
       const playerCard = state.player.hand[playerIndex];
+      const supreme = state.player.hand.find(card => card.name === "Suprema" && card.id !== cardId);
+      if (supreme) {
+        state.player.hand = state.player.hand.filter(card => card.id !== supreme.id);
+        state.player.discard.push(supreme);
+        draw(state.ai, 2);
+        addLog(`Suprema foi ignorada e se descartou, concedendo 2 cartas para a IA.`);
+      }
       if (!canPay(state.player, playerCard)) {
         addLog(`Mantra insuficiente para jogar ${label(playerCard)}. Aguarde regenerar.`);
         render();
@@ -1334,12 +1663,57 @@
       render();
     }
 
+    function discardSelected() {
+      if (state.locked || state.over || state.phase !== "confirm" || state.player.discardBroken) return;
+      const index = state.player.hand.findIndex(card => card.id === state.pendingCardId);
+      if (index < 0) return;
+      const [discarded] = state.player.hand.splice(index, 1);
+      discardCard(state.player, discarded);
+      const shattered = registerDiscard(state.player);
+      const replacement = drawRandom(state.player);
+      addLog(`Você descartou ${label(discarded)} e recebeu ${replacement ? label(replacement) : "nenhuma carta"}. A ação consumiu seu turno.${shattered ? " O botão de descarte quebrou." : ""}`);
+      state.pendingCardId = null;
+      state.locked = true;
+      state.phase = "ai";
+      state.discardInProgress = true;
+      els.resultPill.textContent = "Turno descartado";
+      if (shattered) {
+        els.discardBtn.classList.add("shattering", "broken");
+        window.setTimeout(() => els.discardBtn.classList.remove("shattering"), 550);
+      }
+      updateSlots();
+      render();
+      window.setTimeout(() => {
+        if (!state.discardInProgress || state.over) return;
+        state.discardInProgress = false;
+        state.locked = false;
+        nextTurn("b");
+        updateSlots();
+        render();
+      }, 850);
+    }
+
+    function registerDiscard(owner) {
+      owner.discardUses += 1;
+      owner.discardBroken = owner.discardUses >= 3;
+      return owner.discardBroken;
+    }
+
     function confirmTurn() {
       if (state.locked || state.over || state.phase !== "confirm") return;
       const playerIndex = state.player.hand.findIndex(card => card.id === state.pendingCardId);
       if (playerIndex < 0) return;
       const playerCard = state.player.hand[playerIndex];
       if (!canPay(state.player, playerCard)) return;
+      const restriction = specialRestriction(state.player, playerCard);
+      if (restriction) {
+        addLog(restriction);
+        state.pendingCardId = null;
+        state.phase = "choose";
+        render();
+        return;
+      }
+      applySpecialCost(state.player, playerCard);
       if (!state.ai.hand.length) {
         checkGameOver();
         return;
@@ -1351,8 +1725,7 @@
       state.player.hand.splice(playerIndex, 1);
       state.selected = playerCard;
       const aiCard = chooseAiCard(playerCard);
-      // Mantém o limite de 5 a 50 segundos, mas favorece decisões mais rápidas.
-      const thinkingSeconds = 5 + Math.floor(Math.random() * Math.random() * 46);
+      const thinkingSeconds = aiThinkingSeconds();
       const thinkingTime = thinkingSeconds * 1000;
       state.turnDeadline = performance.now() + 60000;
       state.aiDeadline = performance.now() + thinkingTime;
@@ -1363,6 +1736,20 @@
 
     function finishAiThinking(playerCard, aiCard) {
       if (state.over || state.selected !== playerCard) return;
+      if (aiCard && !state.ai.discardBroken && Math.random() < .06) {
+        state.ai.hand = state.ai.hand.filter(card => card.id !== aiCard.id);
+        discardCard(state.ai, aiCard);
+        const shattered = registerDiscard(state.ai);
+        const replacement = drawRandom(state.ai);
+        rewardWinner(playerCard, state.player);
+        state.aiCard = null;
+        addLog(`IA descartou ${label(aiCard)} e recebeu ${replacement ? label(replacement) : "nenhuma carta"}; a carta escolhida por você voltou para a mão.${shattered ? " O descarte da IA quebrou." : ""}`);
+        state.locked = false;
+        nextTurn("a");
+        updateSlots();
+        render();
+        return;
+      }
       if (!aiCard) {
         state.aiCard = null;
         updateSlots();
@@ -1378,13 +1765,31 @@
       triggerCardEffect(playerCard, "player");
       triggerCardEffect(aiCard, "ai");
       render();
-      window.setTimeout(() => resolveBattle(playerCard, aiCard), 1800);
+      triggerDuelAnimation(compare(playerCard, aiCard), playerCard, aiCard);
+      window.setTimeout(() => resolveBattle(playerCard, aiCard), 2200);
     }
 
     function chooseAiCard(playerCard) {
       const roll = Math.random();
-      const hand = state.ai.hand.filter(card => canPay(state.ai, card));
+      let hand = state.ai.hand.filter(card => canPay(state.ai, card));
       if (!hand.length) return null;
+      const prefersExpensive = state.difficulty >= 3;
+      if (state.difficulty === 4 && !state.ai.discardBroken && !hand.some(card => mantraCost[card.rarity] >= 10)) {
+        const sacrifice = [...hand].sort((a, b) => mantraCost[a.rarity] - mantraCost[b.rarity])[0];
+        state.ai.hand = state.ai.hand.filter(card => card.id !== sacrifice.id);
+        discardCard(state.ai, sacrifice);
+        const shattered = registerDiscard(state.ai);
+        const replacement = drawRandom(state.ai);
+        addLog(`IA Bizarra descartou ${label(sacrifice)} procurando uma carta devastadora${replacement ? "." : ", mas o deck acabou."}${shattered ? " O descarte da IA quebrou." : ""}`);
+        hand = state.ai.hand.filter(card => canPay(state.ai, card));
+        if (!hand.length) return null;
+      }
+      if (prefersExpensive) {
+        return [...hand].sort((a, b) => {
+          const costDifference = mantraCost[b.rarity] - mantraCost[a.rarity];
+          return costDifference || aiScore(b, playerCard) - aiScore(a, playerCard);
+        })[0];
+      }
       const legendary = hand.find(card => card.rarity === "Lendario");
       if (roll < .15 && legendary && hand.length > 1) {
         const nonLegendary = hand.filter(card => card.rarity !== "Lendario");
@@ -1396,6 +1801,58 @@
           .sort((a, b) => b.score - a.score)[0].card;
       }
       return hand[Math.floor(Math.random() * hand.length)];
+    }
+
+    function specialRestriction(owner, card) {
+      if (!owner.usedLegendaries.has(card.name)) return "";
+      if (card.name === "Mundo" && !["Planta", "Agua", "Pedra"].every(name => owner.deck.some(item => item.name === name))) return "Mundo precisa de Planta, Água e Pedra no deck para voltar ao campo.";
+      if (card.name === "Cosmos" && !["Sol", "Lua"].every(name => owner.hand.some(item => item.name === name))) return "Cosmos exige Sol e Lua na mão.";
+      if (card.name === "Cometa" && owner.deck.length !== 2) {
+        if (owner.deck.length === 1) {
+          owner.discard.push(card);
+          owner.hand = owner.hand.filter(item => item.id !== card.id);
+          const pedra = cloneCard(cardByName("Pedra"));
+          owner.hand.push(pedra);
+          return "Cometa era a última carta do deck, foi descartado e virou Pedra.";
+        }
+        return "Cometa só pode ser usado com exatamente 2 cartas no deck.";
+      }
+      if (card.name === "Eclipse" && !["Sol", "Lua"].some(name => owner.hand.some(item => item.name === name))) return "Eclipse exige Sol ou Lua na mão.";
+      if (card.name === "Tsunami" && owner.hand.filter(item => item.name === "Agua").length < 5) return "Tsunami exige 5 cartas de Água na mão.";
+      return "";
+    }
+
+    function applySpecialCost(owner, card) {
+      if (card.rarity === "Lendario" || card.name === "Eclipse") owner.usedLegendaries.add(card.name);
+      if (owner.usedLegendaries.has(card.name) && card.name === "Cosmos") {
+        discardNamed(owner, "Sol", false);
+        discardNamed(owner, "Lua", false);
+      }
+      if (owner.usedLegendaries.has(card.name) && card.name === "Eclipse") {
+        if (!discardNamed(owner, "Sol", false)) discardNamed(owner, "Lua", false);
+      }
+      if (card.name === "Buraco Negro") startBlackHole();
+    }
+
+    function discardNamed(owner, name, generateEclipse = true) {
+      const index = owner.hand.findIndex(item => item.name === name);
+      if (index < 0) return false;
+      discardCard(owner, owner.hand.splice(index, 1)[0], generateEclipse);
+      return true;
+    }
+
+    function discardCard(owner, card, generateEclipse = true) {
+      owner.discard.push(card);
+      if (!generateEclipse || !["Sol", "Lua"].includes(card.name)) return;
+      const counterpart = card.name === "Sol" ? "Lua" : "Sol";
+      let otherIndex = owner.hand.findIndex(item => item.name === counterpart);
+      let other = otherIndex >= 0 ? owner.hand.splice(otherIndex, 1)[0] : null;
+      if (!other) return;
+      owner.discard.push(other);
+      const eclipse = cloneCard(cardByName("Eclipse"));
+      owner.hand.push(eclipse);
+      owner.eclipsePairAvailable = false;
+      addLog(`${label(card)} e ${label(other)} foram descartadas para gerar ${label(eclipse)}.`);
     }
 
     function aiScore(aiCard, playerCard) {
@@ -1419,6 +1876,7 @@
 
     function resolveAiPass(playerCard) {
       rewardWinner(playerCard, state.player);
+      changeDifficulty(1, "a IA não conseguiu responder");
       const burned = state.ai.deck.shift();
       if (burned) state.ai.discard.push(burned);
       els.resultPill.textContent = "IA sem Mantra";
@@ -1434,15 +1892,17 @@
       let message = "";
       if (outcome.winner === "a") {
         rewardWinner(playerCard, state.player);
-        state.ai.discard.push(aiCard);
+        discardCard(state.ai, aiCard);
+        changeDifficulty(1, "você venceu o duelo");
         message = `Você venceu: ${label(playerCard)} derrotou ${label(aiCard)}. ${outcome.reason}`;
       } else if (outcome.winner === "b") {
         rewardWinner(aiCard, state.ai);
-        state.player.discard.push(playerCard);
+        discardCard(state.player, playerCard);
+        changeDifficulty(-1, "a IA venceu o duelo");
         message = `IA venceu: ${label(aiCard)} derrotou ${label(playerCard)}. ${outcome.reason}`;
       } else {
-        state.player.discard.push(playerCard);
-        state.ai.discard.push(aiCard);
+        discardCard(state.player, playerCard);
+        discardCard(state.ai, aiCard);
         message = `Empate: ${label(playerCard)} e ${label(aiCard)} foram descartadas. ${outcome.reason}`;
       }
       els.resultPill.textContent = outcome.winner === "a" ? "Você venceu" : outcome.winner === "b" ? "IA venceu" : "Empate";
@@ -1451,6 +1911,34 @@
       checkGameOver();
       if (!state.over) nextTurn(outcome.winner);
       render();
+    }
+
+    const duelVisuals = {
+      Planta: ["🍃🌿", "nature", "duel-wilt"], Agua: ["💦🌊", "water", "duel-lose"], Fogo: ["🔥💨", "fire", "duel-lose"],
+      Vento: ["💨🌪️", "water", "duel-lose"], Pedra: ["🪨💥", "stone", "duel-crush"], Raio: ["⚡💨", "lightning", "duel-lose"],
+      Gelo: ["❄️🧊", "ice", "duel-freeze"], Nuvem: ["☁️☁️", "water", "duel-lose"], Magma: ["🌋🔥", "magma", "duel-lose"],
+      Oceano: ["🌊💥", "ocean", "duel-lose"], Tempestade: ["⛈️⚡", "lightning", "duel-lose"], Floresta: ["🌳🌿", "nature", "duel-lose"],
+      Sol: ["☀️✨", "supreme", "duel-lose"], Lua: ["🌑🌙", "cosmic", "duel-lose"], Geleira: ["🧊💥", "ice", "duel-freeze"],
+      Estrela: ["⭐🌠", "supreme", "duel-confused"], Mundo: ["🌎🌊", "ocean", "duel-lose"], Cosmos: ["🌌🌈", "cosmic", "duel-lose"],
+      "Buraco Negro": ["⚫🌀", "cosmic", "duel-lose"], Suprema: ["🔔⚖️", "supreme", "duel-lose"], Cometa: ["☄️💥", "fire", "duel-lose"],
+      Eclipse: ["🌘✨", "cosmic", "duel-lose"], Tsunami: ["🌊🌊", "ocean", "duel-lose"]
+    };
+
+    function triggerDuelAnimation(outcome, playerCard, aiCard) {
+      if (outcome.winner === "draw") return;
+      const winner = outcome.winner === "a" ? playerCard : aiCard;
+      const loser = outcome.winner === "a" ? aiCard : playerCard;
+      const visual = duelVisuals[winner.name] || ["✨", "cosmic", "duel-lose"];
+      const loserVisual = duelVisuals[loser.name] || ["💥", "stone", "duel-lose"];
+      const effect = document.createElement("i");
+      effect.className = `fx-duel ${visual[1]}`;
+      effect.textContent = visual[0];
+      els.effectsLayer.append(effect);
+      const winnerSlot = outcome.winner === "a" ? els.playerSlot : els.aiSlot;
+      const loserSlot = outcome.winner === "a" ? els.aiSlot : els.playerSlot;
+      winnerSlot.querySelector(".card")?.classList.add("duel-win");
+      loserSlot.querySelector(".card")?.classList.add("duel-lose", loserVisual[2]);
+      window.setTimeout(() => effect.remove(), 2100);
     }
 
     function compare(a, b) {
@@ -1482,6 +1970,11 @@
 
     function rewardWinner(card, owner) {
       card.wins += 1;
+      if (card.rarity === "Lendario") {
+        owner.discard.push(card);
+        addLog(`${label(card)} venceu, mas foi descartada por ser lendária.`);
+        return;
+      }
       const evolved = maybeEvolve(card);
       owner.hand.push(evolved);
     }
@@ -1548,6 +2041,26 @@
       if (!state.locked && !state.over && state.handAvailability !== playerHandAvailability()) {
         renderPlayerHand();
       }
+    }
+
+    function startBlackHole() {
+      const end = performance.now() + 10000;
+      const drain = window.setInterval(() => {
+        state.player.mantra.value = Math.max(0, state.player.mantra.value - .45);
+        state.ai.mantra.value = Math.max(0, state.ai.mantra.value - .45);
+        if (state.player.mantra.value <= 0 || state.ai.mantra.value <= 0) {
+          replaceDeckWithWind(state.player);
+          replaceDeckWithWind(state.ai);
+          addLog("Buraco Negro zerou um Mantra: os dois decks viraram Vento.");
+          window.clearInterval(drain);
+        } else if (performance.now() >= end) {
+          window.clearInterval(drain);
+        }
+      }, 1000);
+    }
+
+    function replaceDeckWithWind(owner) {
+      owner.deck = Array.from({ length: Math.max(1, owner.deck.length) }, () => cloneCard(cardByName("Vento")));
     }
 
     function tickTurnTimer() {
@@ -1639,6 +2152,14 @@
       for (let i = 0; i < count; i++) createEffect("fx-dot", x, y, 11 + Math.random() * 25, rarityClass[card.rarity]);
     }
 
+    function triggerDrawEffect() {
+      if (!els.effectsLayer) return;
+      const rect = els.effectsLayer.getBoundingClientRect();
+      const x = rect.width * .5;
+      const y = rect.height * .82;
+      for (let i = 0; i < 20; i++) createEffect("fx-dot", x, y, 16 + Math.random() * 32, "rare");
+    }
+
     function createEffect(type, x, y, size, rarity = "") {
       const effect = document.createElement("i");
       effect.className = `${type} ${rarity}`;
@@ -1663,6 +2184,7 @@
     }
 
     function checkGameOver() {
+      if (state.over) return true;
       const playerOut = state.player.deck.length === 0 && state.player.hand.length === 0;
       const aiOut = state.ai.deck.length === 0 && state.ai.hand.length === 0;
       if (!playerOut && !aiOut) return false;
@@ -1673,6 +2195,8 @@
         : aiOut
           ? "O deck e a mão da IA foram esvaziados."
           : "Você ficou sem deck e sem cartas na mão.";
+      if (aiOut && !playerOut) awardCoins(500);
+      if (playerOut && !aiOut) awardCoins(50);
       openModal(title, text);
       addLog(`${title}. ${text}`);
       return true;
@@ -1740,6 +2264,16 @@
       }
     }
 
+    function selectBattleTrack() {
+      const music = document.getElementById("battleMusic");
+      const track = battleTracks[Math.floor(Math.random() * battleTracks.length)];
+      music.pause();
+      music.src = track;
+      music.load();
+      state.battleTrack = track;
+      state.musicStarted = false;
+    }
+
     function startMenuMusic(reset = false) {
       if (mainMenu.hidden) return;
       const music = document.getElementById("menuMusic");
@@ -1777,11 +2311,25 @@
       const battlePaused = document.getElementById("battleMusic").paused;
       els.menuSoundBtn.textContent = menuPaused ? "🔇" : "🔊";
       els.battleSoundBtn.textContent = battlePaused ? "🔇" : "🔊";
+      els.menuSoundBtn.setAttribute("aria-label", menuPaused ? "Ativar música do menu" : "Pausar música do menu");
+      els.menuSoundBtn.title = menuPaused ? "Ativar música" : "Pausar música";
+      els.battleSoundBtn.setAttribute("aria-label", battlePaused ? "Ativar música da batalha" : "Pausar música da batalha");
+      els.battleSoundBtn.title = battlePaused ? "Ativar música" : "Pausar música";
     }
 
     function activateCurrentMusic() {
+      const music = document.getElementById(mainMenu.hidden ? "battleMusic" : "menuMusic");
+      if (!music.paused) {
+        music.pause();
+        updateSoundButtons();
+        return;
+      }
       if (mainMenu.hidden) startMusic();
       else startMenuMusic();
+    }
+
+    function isSoundControl(target) {
+      return target instanceof Element && Boolean(target.closest(".sound-button, .menu-sound-button"));
     }
 
     function setupMenuClash() {
@@ -1799,17 +2347,20 @@
     els.menuSoundBtn.addEventListener("click", activateCurrentMusic);
     els.battleSoundBtn.addEventListener("click", activateCurrentMusic);
     els.confirmBtn.addEventListener("click", confirmTurn);
+    els.discardBtn.addEventListener("click", discardSelected);
     document.getElementById("rulesBtn").addEventListener("click", () => {
       startMusic();
       openModal("Regras", "Escolha uma carta por turno. A IA responde com uma carta da mão dela. Vantagem lógica vence; sem vantagem, o poder da raridade desempata. A vencedora volta para a mão e compra 1 carta. A derrotada é descartada e não compra. Se alguém ficar sem mão, perde o deck restante por exaustão.");
     });
     document.getElementById("modalClose").addEventListener("click", () => els.modal.classList.remove("open"));
-    document.addEventListener("pointerdown", () => {
+    document.addEventListener("pointerdown", event => {
+      if (isSoundControl(event.target)) return;
       if (mainMenu.hidden) startMusic();
       else startMenuMusic();
     }, { capture: true });
 
-    document.addEventListener("click", () => {
+    document.addEventListener("click", event => {
+      if (isSoundControl(event.target)) return;
       if (mainMenu.hidden) startMusic();
       else startMenuMusic();
     }, { capture: true });
@@ -1873,6 +2424,8 @@
     animate();
     setupMenuClash();
     startMenuMusic(true);
+    renderCoins();
+    setDifficulty(state.difficulty);
     window.setInterval(tickMantra, 100);
   </script>
 </body>
